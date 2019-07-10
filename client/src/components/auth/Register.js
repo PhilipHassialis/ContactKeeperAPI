@@ -1,10 +1,22 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import AlertContext from "../../context/alert/alertContext";
+import AuthContext from "../../context/auth/authContext";
 
 const Register = () => {
     const alertContext = useContext(AlertContext);
+    const authContext = useContext(AuthContext);
 
     const { setAlert } = alertContext;
+
+    const { register, error, clearErrors } = authContext;
+
+    useEffect(() => {
+        if (error === "User already exists") {
+            setAlert(error, "danger");
+            clearErrors();
+        } else {
+        }
+    }, [error]);
 
     const [user, setUser] = useState({
         name: "",
@@ -26,7 +38,12 @@ const Register = () => {
         } else if (password !== password2) {
             setAlert("Passwords do not match", "danger");
         } else {
-            console.log("register submit");
+            console.log("registering");
+            register({
+                name,
+                email,
+                password
+            });
         }
     };
 
@@ -43,7 +60,15 @@ const Register = () => {
                 </div>
                 <div className="form-group">
                     <label htmlFor="email">Email Address</label>
-                    <input type="email" name="email" value={email} onChange={onChange} placeholder="Email Adress" required minLength="6"/>
+                    <input
+                        type="email"
+                        name="email"
+                        value={email}
+                        onChange={onChange}
+                        placeholder="Email Adress"
+                        required
+                        minLength="6"
+                    />
                 </div>
                 <div className="form-group">
                     <label htmlFor="password">Password</label>
@@ -57,7 +82,8 @@ const Register = () => {
                         value={password2}
                         onChange={onChange}
                         placeholder="Confirm Password"
-                        required minLength="6"
+                        required
+                        minLength="6"
                     />
                 </div>
                 <input type="submit" value="Register" className="btn btn-primary btn-block" />
