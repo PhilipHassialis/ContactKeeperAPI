@@ -2,43 +2,42 @@ import React, { useReducer } from "react";
 import uuid from "uuid";
 import ContactContext from "./contactContext";
 import contactReducer from "./contactReducer";
-import { ADD_CONTACT, DELETE_CONTACT, SET_CURRENT, CLEAR_CURRENT, UPDATE_CONTACT, FILTER_CONTACTS, CLEAR_FILTER } from "../Types";
+import axios from "axios";
+import {
+    ADD_CONTACT,
+    DELETE_CONTACT,
+    SET_CURRENT,
+    CLEAR_CURRENT,
+    UPDATE_CONTACT,
+    FILTER_CONTACTS,
+    CLEAR_FILTER,
+    CONTACT_ERROR
+} from "../Types";
 
 const ContactState = props => {
     const initialState = {
-        contacts: [
-            {
-                id: 1,
-                name: "aaa",
-                email: "aaa@aaa.aaa",
-                phone: "111-111-111",
-                type: "personal"
-            },
-            {
-                id: 2,
-                name: "bbb",
-                email: "bbb@bbb.bbb",
-                phone: "222-222-222",
-                type: "personal"
-            },
-            {
-                id: 3,
-                name: "ccc",
-                email: "ccc@ccc.ccc",
-                phone: "333-333-333",
-                type: "professional"
-            }
-        ],
+        contacts: [],
         current: null,
-        filtered: null
+        filtered: null,
+        error: null
     };
 
     const [state, dispatch] = useReducer(contactReducer, initialState);
 
     // add contact
-    const addContact = contact => {
-        contact.id = uuid.v4();
-        dispatch({ type: ADD_CONTACT, payload: contact });
+    const addContact = async contact => {
+        const config = {
+            headers: {
+                "Content-type": "application/json"
+            }
+        };
+
+        try {
+            const res = await axios.post("/api/contacts", contact, config);
+            dispatch({ type: ADD_CONTACT, payload: res.data });
+        } catch (error) {
+            dispatch({ type: CONTACT_ERROR, payload: error.response.msg });
+        }
     };
 
     // delete contact
@@ -74,6 +73,7 @@ const ContactState = props => {
             value={{
                 contacts: state.contacts,
                 current: state.current,
+                error: state.error,
                 addContact,
                 deleteContact,
                 setCurrent,
